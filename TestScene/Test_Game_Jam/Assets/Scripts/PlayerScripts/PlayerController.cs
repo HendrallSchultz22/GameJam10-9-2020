@@ -19,8 +19,8 @@ public class PlayerController : MonoBehaviour
    
     public Gamepad pDevicePad;
 
-  
-   
+    PlayerStats Stats;
+
     private void Awake()
     {
       
@@ -28,51 +28,49 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
-        Gamepad[] pads = Gamepad.all.ToArray();
-
-        if (pads.Length < 1)
-        {
-            Debug.LogError("Connect a Controller");
-            return;
-        }
-
-        pDevice = pads[0].device;
-
-        pDevicePad = pads[0];
-       
         rb = GetComponent<Rigidbody>();
         rb.useGravity = true;
-  
     }
 
    
     void Update()
     {
         Move();
-        if (pDevicePad.buttonWest.wasPressedThisFrame)
+        Gamepad[] pads = Gamepad.all.ToArray();
+        if (pads.Length < 1)
         {
-            Attack();
+            Debug.LogError("Connect A Controller!!!");
+            return;
         }
-        if (pDevicePad.buttonNorth.wasPressedThisFrame)
+       
+        pDevicePad = pads[0];
+        if (pDevicePad.rightTrigger.wasPressedThisFrame)
+        {
+           Attack();
+        }
+        if (pDevicePad.rightShoulder.wasPressedThisFrame)
         {
             Switch();
         }
-        if (pDevicePad.buttonSouth.wasPressedThisFrame)
+        if (pDevicePad.buttonNorth.wasPressedThisFrame)
         {
-            Reload();
+           if (isGrounded)
+           {
+              Jump();
+           }
         }
         if (pDevicePad.buttonEast.wasPressedThisFrame)
         {
-            if (isGrounded)
-            {
-                Jump();
-            }
-            
+            Run();
         }
-
-
-        
-
+        if (pDevicePad.buttonWest.wasPressedThisFrame)
+        {
+            Reload();
+        }
+        if (pDevicePad.buttonSouth.wasPressedThisFrame)
+        {
+            Interact();
+        }
     }
 
 
@@ -90,11 +88,17 @@ public class PlayerController : MonoBehaviour
         Debug.Log("Attack");
         //Shoot bullet
     }
-    
+
     public void Switch()
     {
         Debug.Log("Switch");
         //Switch Weapons
+    }
+
+    public void Run()
+    {
+        Debug.Log("Run");
+        //Switch to Run
     }
 
     public void Reload()
@@ -102,7 +106,11 @@ public class PlayerController : MonoBehaviour
         Debug.Log("Reload");
         //Reload Weapons
     }
-
+    public void Interact()
+    {
+        Debug.Log("Interact");
+        //Interact??
+    }
     public void Jump()
     {
         Debug.Log("Jump");

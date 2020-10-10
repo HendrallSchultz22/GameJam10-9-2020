@@ -7,45 +7,44 @@ public class PlayerCamera : MonoBehaviour
 {
     public float RotationSpeed = 1;
     public Transform Target, Player;
-    float mouseX, mouseY;
+    float Xaxis, Yaxis;
     public Vector2 Cammove;
     Gamepad PDevice;
     void Start()
     {
-
+     
+       
     }
 
 
-    void LateUpdate()
+    void Update()
     {
         CameraMove();
     }
 
     void CameraMove()
-    {
+    { 
         Gamepad[] pads = Gamepad.all.ToArray();
         if (pads.Length < 1)
         {
-            Debug.LogError("Connect a Controller");
+            Debug.LogError("Connect A Controller!!!");
             return;
         }
-        else
-        {
-            PDevice = pads[0];
-            mouseX += PDevice.rightStick.x.ReadValue() * RotationSpeed;
-            mouseY -= PDevice.rightStick.y.ReadValue() * RotationSpeed;
-            mouseY = Mathf.Clamp(mouseY, -35, 60);
+        PDevice = pads[0];
+        Xaxis+= PDevice.rightStick.x.ReadValue() * RotationSpeed;
+        Yaxis -= PDevice.rightStick.y.ReadValue() * RotationSpeed;
+        Yaxis = Mathf.Clamp(Yaxis, -35, 60);
 
-            transform.LookAt(Target);
+        transform.LookAt(Target);
 
-            Target.rotation = Quaternion.Euler(mouseY, mouseX, 0);
-            Player.rotation = Quaternion.Euler(0, mouseX, 0);
-        }
-
+        Target.rotation = Quaternion.Euler(Yaxis, Xaxis, 0);
+        Player.rotation = Quaternion.Euler(0, Xaxis, 0);
+      
     }
 
     public void OnCameraMove(InputValue value)
     {
         Cammove = value.Get<Vector2>();
     }
+   
 }
