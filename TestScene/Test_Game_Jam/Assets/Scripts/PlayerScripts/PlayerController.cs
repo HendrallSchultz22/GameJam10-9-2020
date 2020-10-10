@@ -48,6 +48,7 @@ public class PlayerController : MonoBehaviour
    
     void Update()
     {
+        Move();
         if (pDevicePad.buttonWest.wasPressedThisFrame)
         {
             Attack();
@@ -70,31 +71,20 @@ public class PlayerController : MonoBehaviour
         }
 
 
-        //horizontal
-        if (pDevicePad.leftStick.x.ReadValue() > 0)
-        {
-            transform.position += Vector3.right * movementSpeed * Time.deltaTime;
-        }
-        //vertical 
-        if (pDevicePad.leftStick.y.ReadValue() > 0)
-        {
-            transform.position += Vector3.forward * movementSpeed * Time.deltaTime;
-        }
-        //horizontal 
-        if (pDevicePad.leftStick.x.ReadValue() < 0)
-        {
-           transform.position += Vector3.left * backSpeed * Time.deltaTime;
-        }
-        //vertical 
-        if (pDevicePad.leftStick.y.ReadValue() < 0)
-        {
-           transform.position += Vector3.back * movementSpeed * Time.deltaTime;
-        }
+        
 
     }
 
-    
 
+    public void Move()
+    {
+        Vector3 movement = new Vector3(Moveet.x, 0, Moveet.y) * movementSpeed * Time.deltaTime;
+        transform.Translate(movement);
+    }
+    private void OnMove(InputValue value)
+    {
+        Moveet = value.Get<Vector2>();
+    }
     public void Attack()
     {
         Debug.Log("Attack");
@@ -116,12 +106,23 @@ public class PlayerController : MonoBehaviour
     public void Jump()
     {
         Debug.Log("Jump");
-        //....Jump?
+        rb.AddForce(0, jumpForce, 0, ForceMode.Impulse);
+    }
+    private void OnCollisionEnter(Collision other)
+    {
+        if (other.gameObject.tag == "Floor")
+        {
+            isGrounded = true;
+        }
     }
 
-    private void OnMove(InputValue value)
+    private void OnCollisionExit(Collision other)
     {
-        Moveet = value.Get<Vector2>();
+        if (other.gameObject.tag == "Floor")
+        {
+            isGrounded = false;
+        }
     }
+
 }
 
