@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     Rigidbody rb;
     public float jumpForce = 300f;
     public bool isGrounded;
+    public bool isRunning;
     [SerializeField] public float movementSpeed = 5f;
     [SerializeField] public float backSpeed = 5f;
 
@@ -36,6 +37,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         Move();
+        
         Gamepad[] pads = Gamepad.all.ToArray();
         if (pads.Length < 1)
         {
@@ -59,9 +61,18 @@ public class PlayerController : MonoBehaviour
               Jump();
            }
         }
-        if (pDevicePad.buttonEast.wasPressedThisFrame)
+        if (pDevicePad.buttonEast.isPressed)
         {
+            isRunning = true;
             Run();
+        }
+        if (!pDevicePad.buttonEast.isPressed)
+        {
+            isRunning = false;
+            if (!isRunning)
+            {
+                movementSpeed = 5.0f;
+            }
         }
         if (pDevicePad.buttonWest.wasPressedThisFrame)
         {
@@ -86,7 +97,11 @@ public class PlayerController : MonoBehaviour
     public void Attack()
     {
         Debug.Log("Attack");
-        BaseWeaponScript.AmmoLeft -= 1;
+        if(BaseWeaponScript.AmmoLeft >= 1)
+        {
+            BaseWeaponScript.AmmoLeft -= 1.0f;
+        }
+        
         //Shoot bullet
     }
 
@@ -99,13 +114,29 @@ public class PlayerController : MonoBehaviour
     public void Run()
     {
         Debug.Log("Run");
+        if(PlayerStats.playerEndurance > 0 && isRunning)
+        {
+            movementSpeed = 15.0f;
+            
+            PlayerStats.playerEndurance -= 0.8f;
+        }
         //Switch to Run
+    }
+
+    public void CallReload()
+    {
+        Debug.Log("Call Reload");
     }
 
     public void Reload()
     {
         Debug.Log("Reload");
-        //Reload Weapons
+        if(PlayerStats.playerEndurance >= 100.0f && BaseWeaponScript.AmmoLeft <= 0)
+        {
+            PlayerStats.playerEndurance -= 100.0f;
+            BaseWeaponScript.AmmoLeft = BaseWeaponScript.AmmoMaX;
+        }
+        
     }
     public void Interact()
     {
@@ -119,7 +150,7 @@ public class PlayerController : MonoBehaviour
     }
     private void OnCollisionEnter(Collision other)
     {
-        if (other.gameObject.tag == "Floor")
+        if (other.gameObject.tag == "Domain")
         {
             isGrounded = true;
         }
@@ -127,7 +158,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionExit(Collision other)
     {
-        if (other.gameObject.tag == "Floor")
+        if (other.gameObject.tag == "Domain")
         {
             isGrounded = false;
         }

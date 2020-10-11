@@ -7,7 +7,7 @@ using TMPro;
 [RequireComponent(typeof(Rigidbody))] //requires any game model we use for the player to have rigidbody, as it is a neccesity.
 public class PlayerStats : MonoBehaviour
 {
-    Rigidbody rb; // Fundamental Reference for Rigidbody for future use.
+    public static Rigidbody rb; // Fundamental Reference for Rigidbody for future use.
 
     public PlayerController player; //Reference to the player controller script for neccesery state changes.
 
@@ -18,12 +18,12 @@ public class PlayerStats : MonoBehaviour
    
 
     [Range(0, 100)] // max range for the health points of the player.
-    public float playerHealth; // actual number of health points that the player has, will be updated in this script later and is alterable. 
-    public int playerMaxHealth;// Total Starting number or maximum health points the player can have at one time.
+    public static float playerHealth; // actual number of health points that the player has, will be updated in this script later and is alterable. 
+    public static float playerMaxHealth;// Total Starting number or maximum health points the player can have at one time.
 
     [Range(0, 200)] // max range for the endurance points of the player.
-    public float playerEndurance; // actual amount of encurance points the player has, and will be updated through interactions in this script.
-    public float playerMaxEndurance; // total starting and maximum number of endurance points the player can have at one time.
+    public static float playerEndurance; // actual amount of encurance points the player has, and will be updated through interactions in this script.
+    public static float playerMaxEndurance; // total starting and maximum number of endurance points the player can have at one time.
 
     public GameObject HitEffect; // storage point for the aesthetic response to the player being hit I.E blood or other colored effects on taking damage.
 
@@ -52,18 +52,13 @@ public class PlayerStats : MonoBehaviour
     {
         healthVisual.value = playerHealth;
         enduranceVisual.value = playerEndurance;
-        if(playerEndurance < playerMaxEndurance - 2)
-        {
-            playerEndurance += 0.4f;
-        }
+        //if(playerEndurance < playerMaxEndurance - 2)
+        //{
+        //    playerEndurance += 0.2f;
+        //}
         
-
-        if (playerHealth <= 0)
-        {
-            IsDead();
-        }
     }
-    void IsDead()
+    public static void IsDead()
     {
         playerHealth = 0;
         playerEndurance = 0;
@@ -72,8 +67,22 @@ public class PlayerStats : MonoBehaviour
       
     }
 
-    void DoDamage()
+    public static void EnduranceRegen()
     {
+        if (playerEndurance < playerMaxEndurance - 2)
+        {
+            playerEndurance += 0.2f;
+        }
+    }
 
+    public static void DoDamage(float value)
+    {
+        playerHealth -= value;
+        if (playerHealth <= 0)
+        {
+
+            IsDead();
+
+        }
     }
 }
