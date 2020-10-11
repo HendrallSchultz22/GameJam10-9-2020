@@ -86,6 +86,7 @@ public class PlayerController : MonoBehaviour
     public void Attack()
     {
         Debug.Log("Attack");
+        BaseWeaponScript.AmmoLeft -= 1;
         //Shoot bullet
     }
 

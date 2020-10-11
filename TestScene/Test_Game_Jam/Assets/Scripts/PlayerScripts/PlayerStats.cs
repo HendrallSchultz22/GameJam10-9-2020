@@ -9,15 +9,13 @@ public class PlayerStats : MonoBehaviour
 {
     Rigidbody rb; // Fundamental Reference for Rigidbody for future use.
 
-    PlayerController player; //Reference to the player controller script for neccesery state changes.
-    
+    public PlayerController player; //Reference to the player controller script for neccesery state changes.
+
+ 
+
     public Slider healthVisual; // Used for UI element reference in scene for health.
     public Slider enduranceVisual; // Used for UI element reference in scene for endurance.
-    public TextMeshProUGUI playerName; // Can be used as a reference to record the name of the controlled character for flavor.
-    public TextMeshProUGUI ammunitionLeft; // Used for UI element reference in scene to discern the amount of ammo or uses left on a weapon.
-    public TextMeshProUGUI ammunitionTotal; // Used for UI element reference in scene to discern the total amount of ammo for a weapon / uses on weapon.
-
-    public GameObject playerNameOb;
+   
 
     [Range(0, 100)] // max range for the health points of the player.
     public float playerHealth; // actual number of health points that the player has, will be updated in this script later and is alterable. 
@@ -34,16 +32,19 @@ public class PlayerStats : MonoBehaviour
         playerMaxHealth = 100;                                    
         playerHealth = playerMaxHealth;                                         
         playerMaxEndurance = 200;
-        playerEndurance = 200;                                                      
+        playerEndurance = 200;
+
+       
 
         rb = GetComponent<Rigidbody>();                                          
     }
 
     void Start()
     {
-        playerName = playerNameOb.GetComponent<TextMeshProUGUI>();
         healthVisual.maxValue = playerMaxHealth;
         enduranceVisual.maxValue = playerMaxEndurance;
+
+        
     }
 
     
@@ -51,8 +52,11 @@ public class PlayerStats : MonoBehaviour
     {
         healthVisual.value = playerHealth;
         enduranceVisual.value = playerEndurance;
-
-        playerEndurance += 0.4f;
+        if(playerEndurance < playerMaxEndurance - 2)
+        {
+            playerEndurance += 0.4f;
+        }
+        
 
         if (playerHealth <= 0)
         {

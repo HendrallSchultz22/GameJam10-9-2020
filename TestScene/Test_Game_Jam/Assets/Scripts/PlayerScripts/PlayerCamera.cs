@@ -31,9 +31,9 @@ public class PlayerCamera : MonoBehaviour
             return;
         }
         PDevice = pads[0];
-        Xaxis+= PDevice.rightStick.x.ReadValue() * RotationSpeed;
+        Xaxis += PDevice.rightStick.x.ReadValue() * RotationSpeed;
         Yaxis -= PDevice.rightStick.y.ReadValue() * RotationSpeed;
-        Yaxis = Mathf.Clamp(Yaxis, -35, 60);
+       
 
         transform.LookAt(Target);
 
