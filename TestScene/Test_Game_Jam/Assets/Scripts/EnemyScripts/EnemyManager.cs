@@ -16,6 +16,7 @@ public class EnemyManager : MonoBehaviour
         ", the system will wait until an enemy is defeated to spawn the next one.")]
     int maxEnemiesAlive = 20;
     [SerializeField] GameObject skeleton;
+    [SerializeField] GameObject pumkinBoss;
     [SerializeField] Transform[] spawnPoints;
     [SerializeField]
     [Tooltip("How long it takes for enemies to start spawning")]
@@ -30,6 +31,7 @@ public class EnemyManager : MonoBehaviour
     float meleeChance = 0.5f;
 
     float healthScaler = 1;
+    bool spawnBoss = false;
 
     private void Start()
     {
@@ -48,7 +50,8 @@ public class EnemyManager : MonoBehaviour
     {
         if (enemiesToSpawn > 0 && enemiesAlive < maxEnemiesAlive)
         {
-            SpawnSkeleton();
+            if (spawnBoss) SpawnEnemy(pumkinBoss);
+            else SpawnEnemy(skeleton);
         }
     }
 
@@ -57,15 +60,15 @@ public class EnemyManager : MonoBehaviour
         enemiesAlive--;
         if (enemiesAlive == 0)
         {
-            Debug.Log("Finshed wave " + wave);
+            WaveComplete?.Invoke();
             wave++;
             StartCoroutine(DelayStartWave());
         }
     }
 
-    private void SpawnSkeleton()
+    private void SpawnEnemy(GameObject enemy)
     {
-        GameObject newEnemy = Instantiate(skeleton);
+        GameObject newEnemy = Instantiate(enemy);
         int index = Random.Range(0, spawnPoints.Length);
         newEnemy.transform.position = spawnPoints[index].position;
         SkeletonAI AI = newEnemy.GetComponent<SkeletonAI>();
@@ -80,19 +83,34 @@ public class EnemyManager : MonoBehaviour
 
         AI.agresstion = MaxAgression * (1 - (5 / (wave + 4)));
 
+        if (enemy = pumkinBoss)
+        {
+            spawnBoss = false;
+            AI.agresstion = MaxAgression * (1 - (1 / (wave)));
+            BossSpawned?.Invoke();
+        }
+
         enemiesAlive++;
         enemiesToSpawn--;
         StartCoroutine(DelayNextSpawn());
     }
 
+    //calculate the number of enemies that need to spawn this wave
     private void StartWave()
     {
-        CalculateHealthScaler();
-        int spawnLogorithm = wave * wave;
-        for (int i = 0; i < wave; i++)
+        int seed = wave;
+        if (wave % 5 == 0)
         {
             enemiesToSpawn++;
-            if (wave < 13)
+            spawnBoss = true;
+            seed = wave / 5;
+        }
+        CalculateHealthScaler();
+        int spawnLogorithm = seed * seed;
+        for (int i = 0; i < seed; i++)
+        {
+            enemiesToSpawn++;
+            if (seed < 13)
             {
                 while (spawnLogorithm > 0)
                 {
@@ -102,7 +120,7 @@ public class EnemyManager : MonoBehaviour
             }
         }
 
-        if (wave >= 13)
+        if (seed >= 13)
         {
             enemiesToSpawn += 100;
             while (spawnLogorithm > 0)
@@ -111,7 +129,7 @@ public class EnemyManager : MonoBehaviour
                 spawnLogorithm /= 2;
             }
         }
-
+        WaveStart?.Invoke();
     }
 
     //the enemies get tougher as the in higher rounds
@@ -138,4 +156,20 @@ public class EnemyManager : MonoBehaviour
     {
         return wave;
     }
+
+    #region Delegates
+    public delegate void CallBack();
+    CallBack WaveStart;
+    CallBack WaveComplete;
+    CallBack BossSpawned;
+
+    public void SubscribeWaveStart(CallBack aMethod) { WaveStart += aMethod; }
+    public void SubscribeWaveComplete(CallBack aMethod) { WaveComplete += aMethod; }
+    public void SubscribeBossSpawned(CallBack aMethod) { BossSpawned += aMethod; }
+
+    public void UnsubscribeWaveStart(CallBack aMethod) { WaveStart -= aMethod; }
+    public void UnsubscribeWaveComplete(CallBack aMethod) { WaveComplete -= aMethod; }
+    public void UnsubscribeBossSpawned(CallBack aMethod) { BossSpawned -= aMethod; }
+
+    #endregion
 }

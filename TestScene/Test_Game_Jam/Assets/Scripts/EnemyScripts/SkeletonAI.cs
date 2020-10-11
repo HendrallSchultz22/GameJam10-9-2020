@@ -131,7 +131,10 @@ public class SkeletonAI : MonoBehaviour
                     }
                 }
 
-                ThrowBone();
+                //when animations are added change throw bone and Melee to Set Animation trigger
+                //the animations should have events that call these fucntions
+                if (distance > meleeRange) ThrowBone();
+                else Melee();
                 AttackLock = AttackLockout(attackLockoutTimer);
                 StartCoroutine(AttackLock);
             }
