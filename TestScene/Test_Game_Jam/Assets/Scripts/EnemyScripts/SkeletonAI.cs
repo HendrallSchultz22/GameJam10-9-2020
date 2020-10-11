@@ -16,10 +16,10 @@ public class SkeletonAI : MonoBehaviour
     NavMeshAgent agent;
     [SerializeField]
     [Tooltip("How far the enemy will stand from its target to make attacks")]
-    float range = 10;
+    public float range = 10;
     [SerializeField]
     [Tooltip("How close The skeleton has to be to start using melee attacks. Note if range is less then this the skeleton will always melee")]
-    float meleeRange = 2;
+    public float meleeRange = 2;
     [SerializeField]
     [Tooltip("Once the skeleton makes an attack this is how long until it can attack again")]
     float attackLockoutTimer = 1;
@@ -34,8 +34,6 @@ public class SkeletonAI : MonoBehaviour
     [Tooltip("max offset is multiplied by this value for movement")]
     float positionOffserScaler = 5;
 
-
-
     bool inRange;
     bool canAttack = true;
     IEnumerator AttackLock;
@@ -47,7 +45,7 @@ public class SkeletonAI : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         if (target == null) Debug.Log("AI: " + gameObject.name + " does not have a target.");
-        if (agresstion > EnemyManager.MaxAgression) agresstion = EnemyManager.MaxAgression;
+        if (agresstion > EnemyManager.instance.MaxAgression) agresstion = EnemyManager.instance.MaxAgression;
         navSeachRadius = MaxPointOffset * positionOffserScaler * positionOffserScaler;
     }
 
@@ -153,8 +151,8 @@ public class SkeletonAI : MonoBehaviour
         float distance = direction.magnitude;
         direction.Normalize();
 
-        float inversAgresstion = (EnemyManager.MaxAgression - agresstion);
-        float boneTravelFinal = boneTravelTime * Mathf.Lerp(1, 2, Random.Range(0, inversAgresstion) / EnemyManager.MaxAgression);
+        float inversAgresstion = (EnemyManager.instance.MaxAgression - agresstion);
+        float boneTravelFinal = boneTravelTime * Mathf.Lerp(1, 2, Random.Range(0, inversAgresstion) / EnemyManager.instance.MaxAgression);
 
         float time = Mathf.Lerp(0, boneTravelFinal, (distance / range));
         time = time * time;
@@ -189,10 +187,10 @@ public class SkeletonAI : MonoBehaviour
     //high agression level will be more likly to return 0
     private Vector3 GetOffset()
     {
-        float inversAgresstion = (EnemyManager.MaxAgression - agresstion);
-        float x = Mathf.Lerp(0, MaxPointOffset, Random.Range(0, inversAgresstion) / EnemyManager.MaxAgression);
-        float y = Mathf.Lerp(0, MaxPointOffset, Random.Range(0, inversAgresstion) / EnemyManager.MaxAgression);
-        float z = Mathf.Lerp(0, MaxPointOffset, Random.Range(0, inversAgresstion) / EnemyManager.MaxAgression);
+        float inversAgresstion = (EnemyManager.instance.MaxAgression - agresstion);
+        float x = Mathf.Lerp(0, MaxPointOffset, Random.Range(0, inversAgresstion) / EnemyManager.instance.MaxAgression);
+        float y = Mathf.Lerp(0, MaxPointOffset, Random.Range(0, inversAgresstion) / EnemyManager.instance.MaxAgression);
+        float z = Mathf.Lerp(0, MaxPointOffset, Random.Range(0, inversAgresstion) / EnemyManager.instance.MaxAgression);
         if (Random.value <= 0.5f) x = -x;
         if (Random.value <= 0.5f) y = -y;
         if (Random.value <= 0.5f) z = -z;
@@ -214,8 +212,8 @@ public class SkeletonAI : MonoBehaviour
     IEnumerator AttackLockout(float time)
     {
         canAttack = false;
-        float inversAgresstion = (EnemyManager.MaxAgression - agresstion);
-        float scaler = Mathf.Lerp(1, 2, Random.Range(0, inversAgresstion) / EnemyManager.MaxAgression);
+        float inversAgresstion = (EnemyManager.instance.MaxAgression - agresstion);
+        float scaler = Mathf.Lerp(1, 2, Random.Range(0, inversAgresstion) / EnemyManager.instance.MaxAgression);
         yield return new WaitForSeconds(time);
         canAttack = true;
     }
