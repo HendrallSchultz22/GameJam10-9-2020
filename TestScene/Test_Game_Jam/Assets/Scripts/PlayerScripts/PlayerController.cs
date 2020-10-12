@@ -20,7 +20,10 @@ public class PlayerController : MonoBehaviour
    
     public Gamepad pDevicePad;
 
+    public GameObject Wep;
+
     PlayerStats Stats;
+    BaseWeaponScript Weapon;
 
     private void Awake()
     {
@@ -37,7 +40,8 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         Move();
-        
+        Wep = GameObject.FindWithTag("Weapon");
+        Weapon = Wep.GetComponent<BaseWeaponScript>();
         Gamepad[] pads = Gamepad.all.ToArray();
         if (pads.Length < 1)
         {
@@ -97,18 +101,14 @@ public class PlayerController : MonoBehaviour
     public void Attack()
     {
         Debug.Log("Attack");
-        if(BaseWeaponScript.AmmoLeft >= 1)
-        {
-            BaseWeaponScript.AmmoLeft -= 1.0f;
-        }
-        
-        //Shoot bullet
+        Weapon.ReadyShot();
+
     }
 
     public void Switch()
     {
         Debug.Log("Switch");
-        //Switch Weapons
+        Weapon.SwitchWeapon();
     }
 
     public void Run()
@@ -150,7 +150,7 @@ public class PlayerController : MonoBehaviour
     }
     private void OnCollisionEnter(Collision other)
     {
-        if (other.gameObject.tag == "Domain")
+        if (other.gameObject.tag == "Domain" || other.gameObject.tag == "NotDomain")
         {
             isGrounded = true;
         }
@@ -158,7 +158,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionExit(Collision other)
     {
-        if (other.gameObject.tag == "Domain")
+        if (other.gameObject.tag == "Domain" || other.gameObject.tag == "NotDomain")
         {
             isGrounded = false;
         }

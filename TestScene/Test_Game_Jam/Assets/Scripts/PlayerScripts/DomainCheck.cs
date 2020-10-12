@@ -10,7 +10,7 @@ public class DomainCheck : MonoBehaviour
         {
             PlayerStats.EnduranceRegen();
         }
-        if (other.gameObject.tag != "Domain")
+        if (other.gameObject.tag == "NotDomain" )
         {
             PlayerStats.DoDamage(0.2f);
         }

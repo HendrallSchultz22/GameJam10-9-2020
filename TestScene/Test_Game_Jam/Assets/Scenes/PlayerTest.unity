@@ -616,6 +616,18 @@ RectTransform:
   m_AnchoredPosition: {x: -0.2583, y: 0.149}
   m_SizeDelta: {x: 140, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &739385789 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7615192545622102726, guid: 309dc78d4f8f77f4cbf73788419493b5,
+    type: 3}
+  m_PrefabInstance: {fileID: 1356037974}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &919150024 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5390030638606639891, guid: 309dc78d4f8f77f4cbf73788419493b5,
+    type: 3}
+  m_PrefabInstance: {fileID: 1356037974}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1005912192
 GameObject:
   m_ObjectHideFlags: 0
@@ -771,6 +783,7 @@ MonoBehaviour:
   isRunning: 0
   movementSpeed: 5
   backSpeed: 5
+  Wep: {fileID: 0}
 --- !u!136 &1023446624
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -906,7 +919,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2416f45eb317484458e8432d6434384c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 0}
+  player: {fileID: 1023446623}
   healthVisual: {fileID: 502086173}
   enduranceVisual: {fileID: 727103170}
   HitEffect: {fileID: 0}
@@ -936,7 +949,7 @@ GameObject:
   - component: {fileID: 1068454248}
   m_Layer: 0
   m_Name: Floor (1)
-  m_TagString: Untagged
+  m_TagString: NotDomain
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1383,6 +1396,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: sawedoffshotgun
+      objectReference: {fileID: 0}
+    - target: {fileID: 1564118620574128698, guid: 309dc78d4f8f77f4cbf73788419493b5,
+        type: 3}
+      propertyPath: m_TagString
+      value: Weapon
       objectReference: {fileID: 0}
     - target: {fileID: 2233518464559300736, guid: 309dc78d4f8f77f4cbf73788419493b5,
         type: 3}
@@ -2161,8 +2179,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   weaponList:
   - WeaponName: SawedOff Shotgun
-    weaponDMG: 69
     weaponAmmo: 4
+    BulletPrefab: {fileID: 3991532793042013587, guid: 77a5af24991bad646a30081aed40097b,
+      type: 3}
   ammunitionLeft: {fileID: 1333149420}
   ammunitionTotal: {fileID: 1533413475}
+  BarrelLoc1: {fileID: 739385789}
+  BarrelLoc2: {fileID: 919150024}
   player: {fileID: 1023446622}

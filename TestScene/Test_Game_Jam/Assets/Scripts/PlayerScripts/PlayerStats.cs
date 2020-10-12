@@ -9,7 +9,7 @@ public class PlayerStats : MonoBehaviour
 {
     public static Rigidbody rb; // Fundamental Reference for Rigidbody for future use.
 
-    public PlayerController player; //Reference to the player controller script for neccesery state changes.
+    public PlayerController player; 
 
  
 
@@ -52,10 +52,7 @@ public class PlayerStats : MonoBehaviour
     {
         healthVisual.value = playerHealth;
         enduranceVisual.value = playerEndurance;
-        //if(playerEndurance < playerMaxEndurance - 2)
-        //{
-        //    playerEndurance += 0.2f;
-        //}
+       
         
     }
     public static void IsDead()
