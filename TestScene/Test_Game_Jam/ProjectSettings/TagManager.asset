@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - Floor
+  - Domain
+  - Weapon
+  - NotDomain
   layers:
   - Default
   - TransparentFX

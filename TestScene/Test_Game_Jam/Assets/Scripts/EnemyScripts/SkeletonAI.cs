@@ -8,45 +8,29 @@ public class SkeletonAI : MonoBehaviour
 {
     [Tooltip("In most instances this should be set to the player")]
     public Transform target;
-    [Tooltip("Adjust this to directly impact how much damage is done by the AI, The exact number will vary")]
-    public float baseDamage = 1;
-    [Tooltip("How focus will the AI be on attack the player")]
-    public float agresstion = 5;
-
     NavMeshAgent agent;
     [SerializeField]
     [Tooltip("How far the enemy will stand from its target to make attacks")]
-    public float range = 10;
-    [SerializeField]
-    [Tooltip("How close The skeleton has to be to start using melee attacks. Note if range is less then this the skeleton will always melee")]
-    public float meleeRange = 2;
+    float range = 1;
+    [SerializeField] float speed = 3.5f;
     [SerializeField]
     [Tooltip("Once the skeleton makes an attack this is how long until it can attack again")]
     float attackLockoutTimer = 1;
     [SerializeField] GameObject bone;
-    [SerializeField] Transform hand;
+    [SerializeField] Transform boneSpawnPoint;
     [SerializeField]
     [Tooltip("This is how long it will take for the projectile to travel to the player at max range, lower this value for higher difficulty")]
     float boneTravelTime = 0.5f;
     [SerializeField] LayerMask sightBlockers;
-    [SerializeField] float MaxPointOffset = 5;
-    [SerializeField]
-    [Tooltip("max offset is multiplied by this value for movement")]
-    float positionOffserScaler = 5;
 
     bool inRange;
     bool canAttack = true;
     IEnumerator AttackLock;
-    IEnumerator movementOffset;
-    Vector3 positionOffset = Vector3.zero;
-    float navSeachRadius = 10;
 
     private void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         if (target == null) Debug.Log("AI: " + gameObject.name + " does not have a target.");
-        if (agresstion > EnemyManager.instance.MaxAgression) agresstion = EnemyManager.instance.MaxAgression;
-        navSeachRadius = MaxPointOffset * positionOffserScaler * positionOffserScaler;
     }
 
     private void Update()
@@ -63,14 +47,10 @@ public class SkeletonAI : MonoBehaviour
     {
         if (!inRange)
         {
-            if (agent.remainingDistance < range || DistanceToPlayer() <= range)
-            {
-                positionOffset = GetOffset();
-            }
-            SetDestination(target.position + (positionOffset * positionOffserScaler));
-            inRange = DistanceToPlayer() <= range;
+            agent.SetDestination(target.position);
+            inRange = agent.remainingDistance <= range;
         }
-
+        
         else
         {
             agent.ResetPath();
@@ -80,37 +60,6 @@ public class SkeletonAI : MonoBehaviour
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, agent.angularSpeed * Time.deltaTime);
         }
-    }
-
-    private void SetDestination(Vector3 point)
-    {
-        NavMeshHit nHit;
-        NavMesh.SamplePosition(point, out nHit, navSeachRadius, -1);
-
-        NavMeshPath navpath = new NavMeshPath();
-        NavMesh.CalculatePath(transform.position, nHit.position, -1, navpath);
-        if (navpath.status == NavMeshPathStatus.PathComplete)
-        {
-            agent.SetDestination(nHit.position);
-        }
-    }
-
-    private float DistanceToPlayer()
-    {
-        Vector3 destination = agent.destination;
-        float pathLength = 0;
-        NavMeshHit nHit;
-        NavMesh.SamplePosition(target.position, out nHit, navSeachRadius, -1);
-
-        NavMeshPath navpath = new NavMeshPath();
-        NavMesh.CalculatePath(transform.position, nHit.position, -1, navpath);
-        if (navpath.status == NavMeshPathStatus.PathComplete)
-        {
-            agent.SetDestination(nHit.position);
-            pathLength = agent.remainingDistance;
-        }
-        agent.SetDestination(destination);
-        return pathLength;
     }
 
     //logic for when and how the skeleton attacks
@@ -124,17 +73,15 @@ public class SkeletonAI : MonoBehaviour
                 RaycastHit hit;
                 if (Physics.Raycast(transform.position, (target.position - transform.position).normalized, out hit, distance, sightBlockers))
                 {
+                    Debug.Log(hit.collider.gameObject.name);
                     if (hit.collider.transform != target)
                     {
                         inRange = false;
                         return;
                     }
                 }
-
-                //when animations are added change throw bone and Melee to Set Animation trigger
-                //the animations should have events that call these fucntions
-                if (distance > meleeRange) ThrowBone();
-                else Melee();
+                
+                ThrowBone();
                 AttackLock = AttackLockout(attackLockoutTimer);
                 StartCoroutine(AttackLock);
             }
@@ -142,22 +89,18 @@ public class SkeletonAI : MonoBehaviour
     }
 
     //spawn a new bone and set its velocity
-    public void ThrowBone()
+    private void ThrowBone()
     {
-        GameObject newBone = Instantiate(bone, hand.position, hand.rotation);
+        GameObject newBone = Instantiate(bone, boneSpawnPoint.position, boneSpawnPoint.rotation);
         Rigidbody rb = newBone.GetComponent<Rigidbody>();
 
         Vector3 boneTarget = target.position;
-        boneTarget.y += hand.localPosition.y;
-        boneTarget += GetOffset();
-        Vector3 direction = (boneTarget - hand.position);
+        boneTarget.y += boneSpawnPoint.localPosition.y;
+        Vector3 direction = (boneTarget - boneSpawnPoint.position);
         float distance = direction.magnitude;
         direction.Normalize();
 
-        float inversAgresstion = (EnemyManager.instance.MaxAgression - agresstion);
-        float boneTravelFinal = boneTravelTime * Mathf.Lerp(1, 2, Random.Range(0, inversAgresstion) / EnemyManager.instance.MaxAgression);
-
-        float time = Mathf.Lerp(0, boneTravelFinal, (distance / range));
+        float time = Mathf.Lerp(0, boneTravelTime, (distance / range));
         time = time * time;
         float verticalVelocity = -Physics.gravity.y * time;
         float height = -Physics.gravity.y * time * time + verticalVelocity * time;
@@ -166,57 +109,11 @@ public class SkeletonAI : MonoBehaviour
         Vector3 velocity = direction * horizontalVelocity;
         velocity += Vector3.up * verticalVelocity;
         rb.velocity = velocity;
-        SpinBone(rb);
-
-        float damage = CalculateDamage();
-        newBone.GetComponent<Bone>().damage = damage;
-    }
-
-    //Add some spin to the bone
-    private void SpinBone(Rigidbody rb)
-    {
-        float range = 10;
-        float x = Random.Range(-range, range);
-        float y = Random.Range(-range, range);
-        float z = Random.Range(-range, range);
-        rb.angularVelocity = new Vector3(x, y, z);
-    }
-
-    private float CalculateDamage()
-    {
-        return baseDamage * Random.Range(1, agresstion);
-    }
-
-    //high agression level will be more likly to return 0
-    private Vector3 GetOffset()
-    {
-        float inversAgresstion = (EnemyManager.instance.MaxAgression - agresstion);
-        float x = Mathf.Lerp(0, MaxPointOffset, Random.Range(0, inversAgresstion) / EnemyManager.instance.MaxAgression);
-        float y = Mathf.Lerp(0, MaxPointOffset, Random.Range(0, inversAgresstion) / EnemyManager.instance.MaxAgression);
-        float z = Mathf.Lerp(0, MaxPointOffset, Random.Range(0, inversAgresstion) / EnemyManager.instance.MaxAgression);
-        if (Random.value <= 0.5f) x = -x;
-        if (Random.value <= 0.5f) y = -y;
-        if (Random.value <= 0.5f) z = -z;
-        return new Vector3(x, y, z);
-    }
-
-    public void Melee()
-    {
-        Collider[] cols = Physics.OverlapSphere(hand.position, meleeRange);
-        foreach (Collider c in cols)
-        {
-            if (c.CompareTag("Player"))
-            {
-                c.SendMessage("DoDamage", CalculateDamage(), SendMessageOptions.DontRequireReceiver);
-            }
-        }
     }
 
     IEnumerator AttackLockout(float time)
     {
         canAttack = false;
-        float inversAgresstion = (EnemyManager.instance.MaxAgression - agresstion);
-        float scaler = Mathf.Lerp(1, 2, Random.Range(0, inversAgresstion) / EnemyManager.instance.MaxAgression);
         yield return new WaitForSeconds(time);
         canAttack = true;
     }
